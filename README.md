@@ -30,49 +30,15 @@
 
 ## Creación proyecto Laravel - Inertia - Voyager
 1. Crear proyecto:
-    + $ laravel new sefar2022 --jet
+    + $ laravel new auth2022 --jet
     + Seleccionar: [1] inertia
     + Will your application use teams? (yes/no) [no]: no
-2. Crear base de datos local **sefar2022** en MySQL (Juego de carácteres: utf8_general_ci)
+2. Crear base de datos local **auth2022** en MySQL (Juego de carácteres: utf8_general_ci)
 3. Cambiar Vue.js por React.js:
     + $ npx laravel-jetstream-react@latest install
-    ::: tip Documentación
     + **[Laravel Jetstream React CLI](https://github.com/ozziexsh/laravel-jetstream-react/tree/2e6a0a2793e9aa15bf763a6068c828c10d56f7f0)**
     + **[Página oficial de Inertia](https://inertiajs.com)**
-    <p></p>
-    :::
-4. Instalar dependencias de Voyager:
-    + $ composer require tcg/voyager
-    ::: tip Documentación
-    + **[Página oficial de Voyager](https://voyager-docs.devdojo.com)**  
-    <p></p>
-    :::
-5. Verificar variables de entorno en **.env** (local):
-    ```env
-    APP_NAME="Sefar Universal"
-    # ...
-    APP_ENV=local
-    # ...
-    APP_DEBUG=true
-    APP_URL=http://sefar2022.test
-    # ...
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=sefar2022
-    DB_USERNAME=root
-    DB_PASSWORD=
-    # ...
-    ```
-6. Instalar Voyager sin registros de prueba:
-    + $ php artisan voyager:install
-    + Esta acción ejecutará las migraciones  
-    ::: warning Advertencia
-    En caso de querer instalar Voyager con registros de prueba, ejecutar:
-    + $ php artisan voyager:install --with-dummy
-    <p></p>
-    :::
-7. Modificar provider **app\Providers\AppServiceProvider.php**:
+4. Modificar provider **app\Providers\AppServiceProvider.php**:
     ```php{2,9}
     // ...
     use Illuminate\Support\Facades\Schema;
@@ -87,7 +53,7 @@
         }
     }
     ```
-8. Modificar configuración de base de datos en **config\database.php**:
+5. Modificar configuración de base de datos en **config\database.php**:
     ```php{4,5,7}
     // ...
     'mysql' => [
@@ -95,49 +61,32 @@
         'charset' => 'utf8',
         'collation' => 'utf8_general_ci',
         // ...
-        'engine' => 'InnoDB',
-        // ...
     ],
     // ...
     ```
-9.  Programar seeder **database\seeders\DatabaseSeeder.php**:
-    ```php
-    // ...
-    use Illuminate\Database\Seeder;
-    use Illuminate\Support\Str;
-    use TCG\Voyager\Models\Role;
-    use TCG\Voyager\Models\User;
-
-    class DatabaseSeeder extends Seeder
-    {
-        // ...
-        public function run()
-        {
-            if (User::count() == 0) {
-                $role = Role::where('name', 'admin')->firstOrFail();
-
-                User::create([
-                    'name'           => 'Admin',
-                    'email'          => 'admin@admin.com',
-                    'password'       => bcrypt('password'),
-                    'remember_token' => Str::random(60),
-                    'role_id'        => $role->id,
-                ]);
-            }
-        }
-    }
+6. Modificar **.env**:
+    ```env
+    # ...
+    APP_URL=http://localhost:8032
     ```
-10. Ejecutar seeder:
-    + $ php artisan db:seed
-11. Ejecutar la aplicación:
+7. Generar tablas en base de datos:
+    + $ php artisan migrate
+8. Para levantar la aplicación, ejecutar en terminales a parte:
     + $ npm run dev
-12. Para generar el directorio **public\build**, ejecutar:
+    + $  php artisan serve --port=8032
+9. Para generar el directorio **public\build**, ejecutar:
     + $ npm run bulid
-13. Quitar de **.gitignore** la carpeta **/public/build**.
-14. Modificar el **Vite manifest** (public\build\manifest.json):
+10. Quitar de **.gitignore** la carpeta **/public/build**.
+
+
+
+
+<!-- 11. Modificar el **Vite manifest** (public\build\manifest.json):
     + Reemplazar **resources/js/app.js** por **resources/js/app.tsx**
     + Reemplazar **.vue** por **.tsx**
     + Reemplazar **-vue_** por **-react_**
+ -->
+
 
 
 ## Obtener ID de cliente de Google
@@ -163,9 +112,7 @@
     + Orígenes autorizados de JavaScript
         + Agrar URI:
             + http://localhost
-            + http://localhost:8082
-            + http://localhost:8000
-            + https://test.corporacioncabv.com
+            + http://localhost:8032
     + Clic en Crear
 12. Respaldar credenciales: ID Cliente y Secret ID.
 13. Modificar **.env**:
@@ -177,6 +124,102 @@
 
 
 ## Obtener ID de cliente de Facebook
+
+
+## Obtener ID de cliente de Twitter
+## Obtener ID de cliente de Instagram
+
+
+## Obtener datos de redes sociales para login
++ **Referencias**:
+    + https://www.youtube.com/watch?v=n31zT7DAsaM
+    + https://github.com/spartacus20/google-autentication-react
+1. Instalar dependencias:
+    + $ npm install gapi-script (Para conectarse con las API's de Google)
+    + $ npm install react-google-login --force
+2. Modificar el archivo de configuración **config\services.php**:
+    ```php
+    //...
+    return [
+        // ...
+        'google_client_id' => env('GOOBLE_CLIENT_ID'),
+        'facebook_client_id' => env('FACEBOOK_CLIENT_ID')
+    ];
+    ```
+3. Modificar el provider **app\Providers\AppServiceProvider.php**:
+    ```php
+    // ...
+    class AppServiceProvider extends ServiceProvider
+    {
+        // ...
+        use Inertia\Inertia;
+        // ...
+        public function register()
+        {
+            Inertia::share('google_client_id', config('services.google_client_id'));
+            Inertia::share('facebook_client_id', config('services.facebook_client_id'));
+        }
+        // ...
+    }
+    ```
+4. Modificar vista **resources\js\Pages\Welcome.tsx**:
+    ```tsx
+    import React, { useEffect, useState } from 'react';
+    import useRoute from '@/Hooks/useRoute';
+    import useTypedPage from '@/Hooks/useTypedPage';
+
+    // Inicio Google Login
+    import GoogleLogin from 'react-google-login';
+    import { gapi } from 'gapi-script';
+    // Fin Google Login
+
+    export default function Welcome() {
+        const page = useTypedPage();
+
+        // Inicio Google Login
+        const googleClientID = page.props.google_client_id;
+        const [userGoogle, setUserGoogle] = useState({});
+
+        useEffect(() => {
+            const start = () => {
+                gapi.auth2.init({
+                    clientId: googleClientID
+                })
+            }
+            gapi.load("client:auth2", start)
+        }, [])
+
+        const onSuccessGoogle = (res?: any) => {
+            console.log(res);
+            setUserGoogle(res.profileObj)
+        }
+        const onFailureGoogle = () => {
+            console.log("Error en auth Google");
+        }
+        // Fin Google Login
+
+        return (
+            <div className="relative flex justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center sm:pt-0">
+                {/* Gooble Login */}
+                <div>
+                    <h1>Login Google</h1>
+                    <GoogleLogin
+                        clientId={googleClientID}
+                        buttonText="Login"
+                        onSuccess={onSuccessGoogle}         // En caso de login exitosos
+                        onFailure={onFailureGoogle}         // En caso de login fallido
+                        cookiePolicy={'single_host_origin'}
+                    />
+                    <div className={userGoogle.email? "profile":"hidden"}>
+                        <img src={userGoogle.imageUrl} alt="Imagen del usuario de Google" />
+                        <p>{userGoogle.name}</p>
+                        <p>{userGoogle.email}</p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    ```
 
 
 ## Deploy en cPanel corporacioncabv
