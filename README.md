@@ -164,6 +164,7 @@
     + https://www.youtube.com/watch?v=n31zT7DAsaM
     + https://github.com/spartacus20/google-autentication-react
     + https://www.npmjs.com/package/react-google-login
+    + https://www.youtube.com/watch?v=rioCHOtitzk
     + https://www.npmjs.com/package/react-facebook-login
 1. Instalar dependencias:
     + $ npm install gapi-script (Para conectarse con las API's de Google)
